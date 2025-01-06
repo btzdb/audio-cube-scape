@@ -30,7 +30,7 @@ export function Header() {
           {profile ? (
             <div className="flex items-center gap-4">
               <Avatar
-                url={profile.avatar_url}
+                imageUrl={profile.avatar_url}
                 username={profile.username}
               />
               <motion.button

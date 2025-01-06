@@ -5,8 +5,11 @@ import { cn } from "@/lib/utils"
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
+    imageUrl?: string;
+    username?: string;
+  }
+>(({ className, imageUrl, username, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
     className={cn(
@@ -14,7 +17,13 @@ const Avatar = React.forwardRef<
       className
     )}
     {...props}
-  />
+  >
+    {imageUrl ? (
+      <AvatarImage src={imageUrl} alt={username || "Avatar"} />
+    ) : (
+      <AvatarFallback>{username?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+    )}
+  </AvatarPrimitive.Root>
 ))
 Avatar.displayName = AvatarPrimitive.Root.displayName
 
