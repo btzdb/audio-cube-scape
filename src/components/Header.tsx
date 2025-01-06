@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProfile } from '@/hooks/useProfile';
 import { AuthModal } from './auth/AuthModal';
-import { Icons } from './icons';
-import { Avatar } from './ui/Avatar';
+import { Icons } from '@/components/icons';
+import { Avatar } from '@/components/ui/Avatar';
 import { supabase } from '@/integrations/supabase/client';
 
 export function Header() {
