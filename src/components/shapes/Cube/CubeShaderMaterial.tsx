@@ -8,30 +8,52 @@ interface CubeShaderMaterialProps {
   frequency: number;
 }
 
+interface CubeUniforms {
+  time: { value: number };
+  frequency: { value: number };
+  primaryColor: { value: THREE.Color };
+  secondaryColor: { value: THREE.Color };
+  bassBumpIntensity: { value: number };
+  bassBumpSpeed: { value: number };
+}
+
 export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { settings } = useVisualizerStore();
 
-  // Initialize uniforms outside of render cycle
-  const uniforms = React.useMemo(() => ({
+  const uniforms = React.useMemo<CubeUniforms>(() => ({
     time: { value: 0 },
     frequency: { value: frequency },
     primaryColor: { value: new THREE.Color(settings.customColors.primary) },
     secondaryColor: { value: new THREE.Color(settings.customColors.secondary) },
     bassBumpIntensity: { value: settings.bassBumpIntensity },
     bassBumpSpeed: { value: settings.bassBumpSpeed }
-  }), []); // Empty deps since we'll update values in useFrame
+  }), [
+    frequency, 
+    settings.customColors.primary,
+    settings.customColors.secondary,
+    settings.bassBumpIntensity,
+    settings.bassBumpSpeed
+  ]);
 
   useFrame((state) => {
     if (!materialRef.current) return;
     
-    materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
+    materialRef.current.uniforms.time.value = state.clock.elapsedTime;
     materialRef.current.uniforms.frequency.value = frequency;
     materialRef.current.uniforms.primaryColor.value.set(settings.customColors.primary);
     materialRef.current.uniforms.secondaryColor.value.set(settings.customColors.secondary);
     materialRef.current.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
     materialRef.current.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
   });
+
+  useEffect(() => {
+    return () => {
+      if (materialRef.current) {
+        materialRef.current.dispose();
+      }
+    };
+  }, []);
 
   return (
     <shaderMaterial
