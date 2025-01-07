@@ -9,6 +9,109 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics: {
+        Row: {
+          beat_id: string | null
+          download_count: number | null
+          favorite_count: number | null
+          id: string
+          last_updated: string | null
+          play_count: number | null
+          view_count: number | null
+        }
+        Insert: {
+          beat_id?: string | null
+          download_count?: number | null
+          favorite_count?: number | null
+          id?: string
+          last_updated?: string | null
+          play_count?: number | null
+          view_count?: number | null
+        }
+        Update: {
+          beat_id?: string | null
+          download_count?: number | null
+          favorite_count?: number | null
+          id?: string
+          last_updated?: string | null
+          play_count?: number | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_beat_id_fkey"
+            columns: ["beat_id"]
+            isOneToOne: false
+            referencedRelation: "beats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_analysis: {
+        Row: {
+          beat_id: string | null
+          beat_markers: Json | null
+          created_at: string | null
+          frequency_data: Json | null
+          id: string
+          waveform_data: Json | null
+        }
+        Insert: {
+          beat_id?: string | null
+          beat_markers?: Json | null
+          created_at?: string | null
+          frequency_data?: Json | null
+          id?: string
+          waveform_data?: Json | null
+        }
+        Update: {
+          beat_id?: string | null
+          beat_markers?: Json | null
+          created_at?: string | null
+          frequency_data?: Json | null
+          id?: string
+          waveform_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_analysis_beat_id_fkey"
+            columns: ["beat_id"]
+            isOneToOne: false
+            referencedRelation: "beats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beat_tags: {
+        Row: {
+          beat_id: string
+          tag_id: string
+        }
+        Insert: {
+          beat_id: string
+          tag_id: string
+        }
+        Update: {
+          beat_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beat_tags_beat_id_fkey"
+            columns: ["beat_id"]
+            isOneToOne: false
+            referencedRelation: "beats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beat_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beats: {
         Row: {
           artist_id: string | null
@@ -97,6 +200,48 @@ export type Database = {
           },
         ]
       }
+      comments: {
+        Row: {
+          beat_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          beat_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          beat_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_beat_id_fkey"
+            columns: ["beat_id"]
+            isOneToOne: false
+            referencedRelation: "beats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       countries: {
         Row: {
           created_at: string | null
@@ -114,6 +259,44 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      cube_faces: {
+        Row: {
+          content_data: Json | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string | null
+          effects: Json | null
+          id: string
+          position: Database["public"]["Enums"]["face_position"]
+          preset_id: string | null
+        }
+        Insert: {
+          content_data?: Json | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          effects?: Json | null
+          id?: string
+          position: Database["public"]["Enums"]["face_position"]
+          preset_id?: string | null
+        }
+        Update: {
+          content_data?: Json | null
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          effects?: Json | null
+          id?: string
+          position?: Database["public"]["Enums"]["face_position"]
+          preset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cube_faces_preset_id_fkey"
+            columns: ["preset_id"]
+            isOneToOne: false
+            referencedRelation: "visualization_presets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       licenses: {
         Row: {
@@ -146,6 +329,80 @@ export type Database = {
             columns: ["beat_id"]
             isOneToOne: false
             referencedRelation: "beats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlist_items: {
+        Row: {
+          added_at: string | null
+          beat_id: string | null
+          id: string
+          playlist_id: string | null
+          position: number
+        }
+        Insert: {
+          added_at?: string | null
+          beat_id?: string | null
+          id?: string
+          playlist_id?: string | null
+          position: number
+        }
+        Update: {
+          added_at?: string | null
+          beat_id?: string | null
+          id?: string
+          playlist_id?: string | null
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_items_beat_id_fkey"
+            columns: ["beat_id"]
+            isOneToOne: false
+            referencedRelation: "beats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_items_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlists_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -246,6 +503,56 @@ export type Database = {
           },
           {
             foreignKeyName: "purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tags: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          audio_preferences: Json | null
+          id: string
+          interface_preferences: Json | null
+          updated_at: string | null
+          user_id: string | null
+          visualization_preferences: Json | null
+        }
+        Insert: {
+          audio_preferences?: Json | null
+          id?: string
+          interface_preferences?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          visualization_preferences?: Json | null
+        }
+        Update: {
+          audio_preferences?: Json | null
+          id?: string
+          interface_preferences?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          visualization_preferences?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
