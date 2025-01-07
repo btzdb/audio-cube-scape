@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAudioStore } from '@/store/useAudioStore';
+import { useAudioStore } from '../store/useAudioStore';
 import { Play, Pause } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';

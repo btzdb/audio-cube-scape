@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useAudioStore } from '@/store/useAudioStore';
+import { useAudioStore } from '../store/useAudioStore';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { Play, Pause, SkipBack, SkipForward, Volume2, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';

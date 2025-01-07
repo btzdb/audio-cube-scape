@@ -2,7 +2,7 @@ import React from 'react';
 import TrackList from './TrackList';
 import { AudioPlayer } from './AudioPlayer';
 import { Background } from './Background';
-import { useAudioStore } from '@/store/useAudioStore';
+import { useAudioStore } from '../store/useAudioStore';
 import { motion } from 'framer-motion';
 
 const BeatStore = () => {
