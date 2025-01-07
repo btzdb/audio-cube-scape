@@ -1,11 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useAudioContext } from '../contexts/AudioContext';
 import { useVisualizerStore } from '../store/useVisualizerStore';
 import { Cube } from './shapes/Cube';
 import { Ring } from './shapes/Ring';
-import * as THREE from 'three';
 
 export function ThreeVisualizer() {
   const { analyser } = useAudioContext();
@@ -18,19 +17,26 @@ export function ThreeVisualizer() {
     let animationFrame: number;
 
     const updateBassFrequency = () => {
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(dataArray);
-      
-      // Enhanced bass detection with weighted average
-      const bassRange = dataArray.slice(0, 10);
-      const bassWeights = bassRange.map((value, index) => 
-        value * Math.pow(0.9, index)
-      );
-      const weightedSum = bassWeights.reduce((a, b) => a + b, 0);
-      const weightedAvg = weightedSum / bassWeights.length;
-      setBassFrequency(weightedAvg);
-      
-      animationFrame = requestAnimationFrame(updateBassFrequency);
+      try {
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(dataArray);
+        
+        // Enhanced bass detection with weighted average and safe reduce
+        const bassRange = dataArray.slice(0, 10);
+        const bassWeights = bassRange.map((value, index) => 
+          value * Math.pow(0.9, index)
+        );
+        
+        // Safe reduce with initial value to prevent undefined acc
+        const weightedSum = bassWeights.reduce((acc, curr) => acc + curr, 0);
+        const weightedAvg = weightedSum / bassWeights.length || 0;
+        
+        setBassFrequency(weightedAvg);
+        animationFrame = requestAnimationFrame(updateBassFrequency);
+      } catch (error) {
+        console.error('Error in frequency analysis:', error);
+        cancelAnimationFrame(animationFrame);
+      }
     };
 
     updateBassFrequency();
