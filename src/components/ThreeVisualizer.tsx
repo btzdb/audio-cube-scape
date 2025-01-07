@@ -20,21 +20,18 @@ export function ThreeVisualizer() {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
         
-        // Calculate bass frequency using a simple loop instead of reduce
+        // Calculate bass frequency using a simple loop
         let sum = 0;
         const bassRange = dataArray.slice(0, 10);
         for (let i = 0; i < bassRange.length; i++) {
-          sum += bassRange[i];
+          sum += bassRange[i] || 0;
         }
-        const bassAvg = sum / bassRange.length;
+        const bassAvg = bassRange.length > 0 ? sum / bassRange.length : 0;
         setBassFrequency(bassAvg);
         
         animationFrameRef.current = requestAnimationFrame(updateBassFrequency);
       } catch (error) {
         console.error('Error in frequency analysis:', error);
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current);
-        }
       }
     };
 
@@ -59,7 +56,7 @@ export function ThreeVisualizer() {
   };
 
   return (
-    <div className="absolute inset-0 z-10">
+    <div className="w-full h-full">
       <Canvas
         camera={{ position: [0, 0, 5] }}
         style={{ background: 'transparent' }}
