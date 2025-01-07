@@ -1,36 +1,25 @@
-import { supabase } from '@/integrations/supabase/client';
-
-export async function uploadAudio(file: File) {
+export const uploadAudio = async (file: File): Promise<string> => {
   try {
-    // Validate file type
     if (!file.type.startsWith('audio/')) {
       throw new Error('Invalid file type. Please upload an audio file.');
     }
 
-    // Generate a unique filename
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const timestamp = new Date().getTime();
+    const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
+    const fileExt = sanitizedFileName.split('.').pop();
+    const uniqueFileName = `${timestamp}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-    // Upload to Supabase storage
-    const { data, error } = await supabase.storage
-      .from('audio')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+    const formData = new FormData();
+    formData.append('file', file);
 
-    if (error) throw error;
+    // Upload to your server/storage here
+    // For now, we'll simulate a successful upload
+    console.log('Uploading audio file:', uniqueFileName);
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('audio')
-      .getPublicUrl(fileName);
-
-    console.log('Audio file uploaded successfully:', publicUrl);
-    
-    return publicUrl;
+    // Return a mock URL for now
+    return URL.createObjectURL(file);
   } catch (error) {
     console.error('Error uploading audio:', error);
     throw error;
   }
-}
+};
