@@ -16,23 +16,23 @@ export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
   }, [settings]);
 
   useEffect(() => {
-    if (material) {
-      material.uniforms.primaryColor.value.set(settings.customColors.primary);
-      material.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+    if (material && material.uniforms) {
+      material.uniforms.primaryColor.value = new THREE.Color(settings.customColors.primary);
+      material.uniforms.secondaryColor.value = new THREE.Color(settings.customColors.secondary);
       material.needsUpdate = true;
     }
   }, [settings.customColors, material]);
 
   useFrame((state) => {
-    if (material) {
+    if (material && material.uniforms) {
       updateMaterialUniforms(
         material,
         settings,
-        state.clock.elapsedTime,
+        state.clock.getElapsedTime(),
         frequency
       );
     }
   });
 
-  return <primitive object={material} attach="material" />;
+  return material ? <primitive object={material} attach="material" /> : null;
 }
