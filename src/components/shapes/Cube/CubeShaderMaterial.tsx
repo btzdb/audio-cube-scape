@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { useVisualizerStore } from '../../../store/useVisualizerStore';
 import { createShaderMaterial, updateMaterialUniforms } from './utils/materialUtils';
 import * as THREE from 'three';
