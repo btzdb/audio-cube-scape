@@ -1,9 +1,11 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { VisualizerSettings } from '../types';
 
 interface VisualizerState {
   settings: VisualizerSettings;
   updateSettings: (newSettings: Partial<VisualizerSettings>) => void;
+  resetSettings: () => void;
 }
 
 const defaultSettings: VisualizerSettings = {
@@ -13,15 +15,32 @@ const defaultSettings: VisualizerSettings = {
   sensitivity: 5,
   colorScheme: 'default',
   customColors: {
-    primary: '#ff0000',
-    secondary: '#00ff00',
-    accent: '#0000ff',
+    primary: '#9f7aea',
+    secondary: '#ec4899',
+    accent: '#f59e0b',
   },
   background: {
     type: 'color',
     color: '#000000',
     imageUrl: null,
     showParticles: false,
+    particleSettings: {
+      count: 100,
+      speed: 1,
+      size: 2,
+      glow: 0.5,
+    },
+  },
+  effects: {
+    particles: {
+      count: 100,
+      speed: 1,
+      size: {
+        min: 1,
+        max: 4,
+      },
+      glow: 0.5,
+    },
   },
   zoomEffect: true,
   zoomSpeed: 0.5,
@@ -42,13 +61,34 @@ const defaultSettings: VisualizerSettings = {
   },
 };
 
-export const useVisualizerStore = create<VisualizerState>((set) => ({
-  settings: defaultSettings,
-  updateSettings: (newSettings) =>
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        ...newSettings,
-      },
-    })),
-}));
+export const useVisualizerStore = create<VisualizerState>()(
+  persist(
+    (set) => ({
+      settings: defaultSettings,
+      updateSettings: (newSettings) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            ...newSettings,
+            background: {
+              ...state.settings.background,
+              ...(newSettings.background || {}),
+            },
+            effects: {
+              ...state.settings.effects,
+              ...(newSettings.effects || {}),
+            },
+            customColors: {
+              ...state.settings.customColors,
+              ...(newSettings.customColors || {}),
+            },
+          },
+        })),
+      resetSettings: () => set({ settings: defaultSettings }),
+    }),
+    {
+      name: 'visualizer-settings',
+      skipHydration: false,
+    }
+  )
+);
