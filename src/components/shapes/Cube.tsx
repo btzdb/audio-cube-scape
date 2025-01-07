@@ -96,14 +96,14 @@ export function Cube({ frequency }: CubeProps) {
     try {
       const lerpFactor = 0.15;
       const smoothFrequency = THREE.MathUtils.lerp(
-        prevFrequency.current || 0,
-        frequency || 0,
+        prevFrequency.current,
+        frequency,
         lerpFactor
       );
       prevFrequency.current = smoothFrequency;
 
       if (shaderMaterial.uniforms) {
-        shaderMaterial.uniforms.time.value = state.clock.elapsedTime || 0;
+        shaderMaterial.uniforms.time.value = state.clock.elapsedTime;
         shaderMaterial.uniforms.frequency.value = smoothFrequency;
         shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
         shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
