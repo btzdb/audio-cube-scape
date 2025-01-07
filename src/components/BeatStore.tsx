@@ -1,30 +1,43 @@
 import React from 'react';
 import TrackList from './TrackList';
-import MusicPlayer from './MusicPlayer';
-import Visualizer from './Visualizer';
-import { useAudioContext } from '@/hooks/useAudioContext';
+import { AudioPlayer } from './AudioPlayer';
+import { Background } from './Background';
+import { useAudioStore } from '@/store/useAudioStore';
+import { motion } from 'framer-motion';
 
 const BeatStore = () => {
-  const { isPlaying, currentTrack } = useAudioContext();
+  const { currentTrack } = useAudioStore();
 
   return (
     <div className="min-h-screen w-full relative">
-      <Visualizer />
+      <Background />
       
       <div className="container mx-auto px-4 py-8 relative z-10">
-        <header className="mb-12 text-center">
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12 text-center"
+        >
           <h1 className="text-4xl font-bold neon-text mb-2">Beat Store</h1>
           <p className="text-muted">Discover and preview unique beats</p>
-        </header>
+        </motion.header>
 
-        <div className="glass-panel p-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel p-6"
+        >
           <TrackList />
-        </div>
+        </motion.div>
 
         {currentTrack && (
-          <div className="fixed bottom-0 left-0 right-0 glass-panel">
-            <MusicPlayer />
-          </div>
+          <motion.div 
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
+            className="fixed bottom-0 left-0 right-0 glass-panel"
+          >
+            <AudioPlayer />
+          </motion.div>
         )}
       </div>
     </div>

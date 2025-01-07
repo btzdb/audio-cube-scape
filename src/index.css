@@ -37,8 +37,3 @@
 .track-row {
   @apply hover:bg-secondary/50 transition-colors duration-200;
 }
-
-.visualizer-container {
-  @apply fixed inset-0 -z-10;
-  background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%);
-}
