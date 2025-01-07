@@ -9,9 +9,9 @@ interface CubeProps {
 
 export function Cube({ frequency }: CubeProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { settings } = useVisualizerStore();
 
+  // Create shader material with properly initialized uniforms
   const shaderMaterial = new THREE.ShaderMaterial({
     uniforms: {
       time: { value: 0 },
@@ -89,15 +89,17 @@ export function Cube({ frequency }: CubeProps) {
   });
 
   useFrame((state) => {
-    if (!meshRef.current || !materialRef.current) return;
+    if (!meshRef.current) return;
 
-    materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
-    materialRef.current.uniforms.frequency.value = frequency;
-    materialRef.current.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
-    materialRef.current.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
-    materialRef.current.uniforms.primaryColor.value.set(settings.customColors.primary);
-    materialRef.current.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+    // Update material uniforms
+    shaderMaterial.uniforms.time.value = state.clock.getElapsedTime();
+    shaderMaterial.uniforms.frequency.value = frequency;
+    shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
+    shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
+    shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
+    shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
 
+    // Update rotation
     const rotationSpeed = 0.01 * settings.bassBumpSpeed * (1 + Math.pow(frequency / 255, 1.2));
     meshRef.current.rotation.x += rotationSpeed;
     meshRef.current.rotation.y += rotationSpeed * 1.5;
@@ -106,7 +108,7 @@ export function Cube({ frequency }: CubeProps) {
   return (
     <mesh ref={meshRef}>
       <boxGeometry args={[1, 1, 1]} />
-      <primitive object={shaderMaterial} ref={materialRef} attach="material" />
+      <shaderMaterial args={[shaderMaterial]} />
     </mesh>
   );
 }
