@@ -8,14 +8,9 @@ interface CubeShaderMaterialProps {
   frequency: number;
 }
 
-interface CubeUniforms {
-  time: { value: number };
-  frequency: { value: number };
-  primaryColor: { value: THREE.Color };
-  secondaryColor: { value: THREE.Color };
-  bassBumpIntensity: { value: number };
-  bassBumpSpeed: { value: number };
-}
+type CubeUniforms = {
+  [key in 'time' | 'frequency' | 'primaryColor' | 'secondaryColor' | 'bassBumpIntensity' | 'bassBumpSpeed']: THREE.IUniform<any>;
+};
 
 export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
