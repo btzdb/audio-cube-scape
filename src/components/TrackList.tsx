@@ -23,14 +23,22 @@ const TrackList = () => {
         // Transform storage data into track format
         const formattedTracks = storageData
           .filter(file => file.name.endsWith('.mp3'))
-          .map(file => ({
-            id: file.id,
-            title: file.name.replace('.mp3', '').replace(/%20/g, ' '),
-            audio_url: `${supabase.supabaseUrl}/storage/v1/object/public/beats/${file.name}`,
-            duration: '0:00', // We'll update this when audio loads
-            bpm: 128, // Default BPM
-            price: 29.99 // Default price
-          }));
+          .map(file => {
+            // Get the public URL using the proper method
+            const { data: { publicUrl } } = supabase
+              .storage
+              .from('beats')
+              .getPublicUrl(file.name);
+
+            return {
+              id: file.id,
+              title: file.name.replace('.mp3', '').replace(/%20/g, ' '),
+              audio_url: publicUrl,
+              duration: '0:00', // We'll update this when audio loads
+              bpm: 128, // Default BPM
+              price: 29.99 // Default price
+            };
+          });
 
         setTracks(formattedTracks);
         console.log('Loaded tracks:', formattedTracks);
