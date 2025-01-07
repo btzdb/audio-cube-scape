@@ -33,7 +33,7 @@ export function Cube({ frequency }: CubeProps) {
   return (
     <mesh ref={meshRef}>
       <boxGeometry args={[1, 1, 1]} />
-      <CubeShaderMaterial settings={settings} frequency={frequency} />
+      <CubeShaderMaterial frequency={frequency} />
     </mesh>
   );
 }

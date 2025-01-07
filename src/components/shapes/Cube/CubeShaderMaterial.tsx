@@ -1,24 +1,31 @@
-import React, { useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { VisualizerSettings } from '../../../types';
+import React, { useMemo, useEffect } from 'react';
+import { useVisualizerStore } from '../../../store/useVisualizerStore';
 import { createShaderMaterial, updateMaterialUniforms } from './utils/materialUtils';
+import { useFrame } from '@react-three/fiber';
 
 interface CubeShaderMaterialProps {
-  settings: VisualizerSettings;
   frequency: number;
 }
 
-export function CubeShaderMaterial({ settings, frequency }: CubeShaderMaterialProps) {
-  const material = useMemo(() => createShaderMaterial(settings), []);
+export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
+  const { settings } = useVisualizerStore();
+  
+  const shaderMaterial = useMemo(() => createShaderMaterial(settings), []);
+
+  useEffect(() => {
+    shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
+    shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+    shaderMaterial.needsUpdate = true;
+  }, [settings.customColors, shaderMaterial]);
 
   useFrame((state) => {
     updateMaterialUniforms(
-      material,
+      shaderMaterial,
       settings,
-      state.clock.getElapsedTime(),
+      state.clock.elapsedTime,
       frequency
     );
   });
 
-  return <shaderMaterial args={[material]} />;
+  return <shaderMaterial args={[shaderMaterial]} />;
 }
