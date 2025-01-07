@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { useAudioContext } from '@/hooks/useAudioContext';
-import { useVisualizerStore } from '@/store/useVisualizerStore';
+import { useAudioContext } from '../contexts/AudioContext';
+import { useVisualizerStore } from '../store/useVisualizerStore';
 
 export function Visualizer() {
   const containerRef = useRef<HTMLDivElement>(null);
