@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useVisualizerStore } from '../../../store/useVisualizerStore';
 import type { CubeUniforms, CubeShaderProps } from './types/shaderTypes';
+import { vertexShader, fragmentShader } from './utils/shaders';
 
 export function CubeShaderMaterial({ frequency }: CubeShaderProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
@@ -69,8 +70,8 @@ export function CubeShaderMaterial({ frequency }: CubeShaderProps) {
     <shaderMaterial
       ref={materialRef}
       uniforms={uniforms}
-      vertexShader={/* ... keep existing code */}
-      fragmentShader={/* ... keep existing code */}
+      vertexShader={vertexShader}
+      fragmentShader={fragmentShader}
       transparent
       side={THREE.DoubleSide}
     />
