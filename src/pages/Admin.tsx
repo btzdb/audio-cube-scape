@@ -3,34 +3,20 @@ import { AdminRoute } from '@/components/auth/AdminRoute';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminStats } from '@/components/admin/AdminStats';
 import { BeatsTable } from '@/components/admin/BeatsTable';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAdminData } from '@/hooks/useAdminData';
 
 const Admin = () => {
-  const { toast } = useToast();
+  const { data, isLoading, handleDeleteBeat } = useAdminData();
 
-  const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('beats')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Beat deleted successfully',
-      });
-    } catch (error: any) {
-      console.error('Delete error:', error);
-      toast({
-        title: 'Delete failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
+  if (isLoading) {
+    return (
+      <AdminRoute>
+        <div className="min-h-screen bg-gray-900 text-white p-8 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-purple-500" />
+        </div>
+      </AdminRoute>
+    );
+  }
 
   return (
     <AdminRoute>
@@ -39,14 +25,14 @@ const Admin = () => {
           <AdminHeader title="Beat Store Admin" />
           
           <AdminStats
-            totalSales={1234.56}
-            totalBeats={10}
-            totalDownloads={35}
+            totalSales={data.totalSales}
+            totalBeats={data.totalBeats}
+            totalDownloads={data.totalDownloads}
           />
 
           <BeatsTable
-            beats={[]}
-            onDelete={handleDelete}
+            beats={data.beats}
+            onDelete={handleDeleteBeat}
           />
         </div>
       </div>
