@@ -10,7 +10,7 @@ interface CubeProps {
 export function Cube({ frequency }: CubeProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const { settings } = useVisualizerStore();
-  const prevFrequency = useRef(frequency);
+  const prevFrequency = useRef(0); // Initialize with 0
 
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -97,18 +97,24 @@ export function Cube({ frequency }: CubeProps) {
       const lerpFactor = 0.15;
       const smoothFrequency = THREE.MathUtils.lerp(
         prevFrequency.current,
-        frequency,
+        frequency || 0,
         lerpFactor
       );
       prevFrequency.current = smoothFrequency;
 
+      const rotationSpeed = 0.01 * (settings.bassBumpSpeed || 0.5) * 
+                         (1 + Math.pow((smoothFrequency || 0) / 255, 1.2));
+                         
+      meshRef.current.rotation.x += rotationSpeed;
+      meshRef.current.rotation.y += rotationSpeed * 1.5;
+
       if (shaderMaterial.uniforms) {
-        shaderMaterial.uniforms.time.value = state.clock.elapsedTime;
-        shaderMaterial.uniforms.frequency.value = smoothFrequency;
-        shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
-        shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+        shaderMaterial.uniforms.time.value = state.clock.elapsedTime || 0;
+        shaderMaterial.uniforms.frequency.value = smoothFrequency || 0;
         shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity || 0.5;
         shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed || 0.5;
+        shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
+        shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
       }
     } catch (error) {
       console.error('Error updating cube:', error);

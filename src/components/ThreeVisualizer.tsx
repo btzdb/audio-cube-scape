@@ -20,17 +20,14 @@ export function ThreeVisualizer() {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
         
-        // Get bass range frequencies (first 10 frequencies)
+        // Calculate bass frequency using a simple loop instead of reduce
+        let sum = 0;
         const bassRange = dataArray.slice(0, 10);
-        
-        // Calculate weighted sum with proper initialization
-        let weightedSum = 0;
         for (let i = 0; i < bassRange.length; i++) {
-          weightedSum += bassRange[i] * Math.pow(0.9, i);
+          sum += bassRange[i];
         }
-        
-        const weightedAvg = weightedSum / bassRange.length;
-        setBassFrequency(weightedAvg);
+        const bassAvg = sum / bassRange.length;
+        setBassFrequency(bassAvg);
         
         animationFrameRef.current = requestAnimationFrame(updateBassFrequency);
       } catch (error) {
