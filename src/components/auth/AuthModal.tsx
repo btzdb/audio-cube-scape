@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { AuthError } from '@supabase/supabase-js';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,15 +12,34 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         onClose();
       }
+      // Clear error when auth state changes
+      setError(null);
     });
 
     return () => subscription.unsubscribe();
   }, [onClose]);
+
+  // Handle authentication errors
+  const handleError = (error: AuthError) => {
+    console.error('Auth error:', error);
+    
+    // Map error codes to user-friendly messages
+    const errorMessages: Record<string, string> = {
+      'invalid_credentials': 'Invalid email or password. Please check your credentials.',
+      'user_not_found': 'No account found with these credentials.',
+      'email_not_confirmed': 'Please verify your email before signing in.',
+      'invalid_grant': 'Invalid login credentials.',
+    };
+
+    setError(errorMessages[error.message] || error.message);
+  };
 
   return (
     <AnimatePresence>
@@ -48,6 +68,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <X size={20} />
                 </button>
               </div>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm"
+                >
+                  {error}
+                </motion.div>
+              )}
               
               <Auth
                 supabaseClient={supabase}
@@ -63,6 +93,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   },
                 }}
                 providers={['google', 'github']}
+                onError={handleError}
               />
             </div>
           </motion.div>

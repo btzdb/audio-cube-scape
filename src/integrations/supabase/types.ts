@@ -177,6 +177,30 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_logs: {
+        Row: {
+          changed_at: string | null
+          id: string
+          new_amount: number | null
+          old_amount: number | null
+          purchase_id: string
+        }
+        Insert: {
+          changed_at?: string | null
+          id?: string
+          new_amount?: number | null
+          old_amount?: number | null
+          purchase_id: string
+        }
+        Update: {
+          changed_at?: string | null
+          id?: string
+          new_amount?: number | null
+          old_amount?: number | null
+          purchase_id?: string
+        }
+        Relationships: []
+      }
       purchases: {
         Row: {
           amount: number
