@@ -13,14 +13,14 @@ export function Cube({ frequency }: CubeProps) {
   const prevFrequency = useRef(frequency);
 
   const shaderMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         frequency: { value: frequency },
         primaryColor: { value: new THREE.Color(settings.customColors.primary) },
         secondaryColor: { value: new THREE.Color(settings.customColors.secondary) },
-        bassBumpIntensity: { value: settings.bassBumpIntensity },
-        bassBumpSpeed: { value: settings.bassBumpSpeed }
+        bassBumpIntensity: { value: settings.bassBumpIntensity || 0.5 },
+        bassBumpSpeed: { value: settings.bassBumpSpeed || 0.5 }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -88,23 +88,40 @@ export function Cube({ frequency }: CubeProps) {
       transparent: true,
       side: THREE.DoubleSide
     });
+
+    // Initialize all uniforms to prevent undefined values
+    material.uniforms.time.value = 0;
+    material.uniforms.frequency.value = frequency || 0;
+    material.uniforms.primaryColor.value = new THREE.Color(settings.customColors.primary);
+    material.uniforms.secondaryColor.value = new THREE.Color(settings.customColors.secondary);
+    material.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity || 0.5;
+    material.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed || 0.5;
+
+    return material;
   }, [settings.customColors.primary, settings.customColors.secondary, settings.bassBumpIntensity, settings.bassBumpSpeed]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
 
-    const lerpFactor = 0.15;
-    const smoothFrequency = THREE.MathUtils.lerp(
-      prevFrequency.current,
-      frequency,
-      lerpFactor
-    );
-    prevFrequency.current = smoothFrequency;
+    try {
+      const lerpFactor = 0.15;
+      const smoothFrequency = THREE.MathUtils.lerp(
+        prevFrequency.current || 0,
+        frequency || 0,
+        lerpFactor
+      );
+      prevFrequency.current = smoothFrequency;
 
-    shaderMaterial.uniforms.time.value = state.clock.elapsedTime;
-    shaderMaterial.uniforms.frequency.value = smoothFrequency;
-    shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
-    shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+      // Update uniforms safely
+      if (shaderMaterial.uniforms) {
+        shaderMaterial.uniforms.time.value = state.clock.elapsedTime || 0;
+        shaderMaterial.uniforms.frequency.value = smoothFrequency;
+        shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
+        shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+      }
+    } catch (error) {
+      console.error('Error updating cube:', error);
+    }
   });
 
   return (
