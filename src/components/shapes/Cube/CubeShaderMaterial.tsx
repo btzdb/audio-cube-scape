@@ -1,22 +1,15 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useVisualizerStore } from '../../../store/useVisualizerStore';
-import { vertexShader, fragmentShader } from './utils/shaders';
+import type { CubeUniforms, CubeShaderProps } from './types/shaderTypes';
 
-interface CubeShaderMaterialProps {
-  frequency: number;
-}
-
-type CubeUniforms = {
-  [key in 'time' | 'frequency' | 'primaryColor' | 'secondaryColor' | 'bassBumpIntensity' | 'bassBumpSpeed']: THREE.IUniform<any>;
-};
-
-export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
+export function CubeShaderMaterial({ frequency }: CubeShaderProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { settings } = useVisualizerStore();
+  const prevFrequency = useRef(frequency);
 
-  const uniforms = React.useMemo<CubeUniforms>(() => ({
+  const uniforms = useMemo<CubeUniforms>(() => ({
     time: { value: 0 },
     frequency: { value: frequency },
     primaryColor: { value: new THREE.Color(settings.customColors.primary) },
@@ -31,15 +24,37 @@ export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
     settings.bassBumpSpeed
   ]);
 
-  useFrame((state) => {
+  useEffect(() => {
     if (!materialRef.current) return;
     
-    materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-    materialRef.current.uniforms.frequency.value = frequency;
-    materialRef.current.uniforms.primaryColor.value.set(settings.customColors.primary);
-    materialRef.current.uniforms.secondaryColor.value.set(settings.customColors.secondary);
-    materialRef.current.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
-    materialRef.current.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
+    try {
+      materialRef.current.uniforms.primaryColor.value.set(settings.customColors.primary);
+      materialRef.current.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+      materialRef.current.needsUpdate = true;
+    } catch (error) {
+      console.error('Error updating shader uniforms:', error);
+    }
+  }, [settings.customColors]);
+
+  useFrame((state) => {
+    if (!materialRef.current) return;
+
+    try {
+      const lerpFactor = 0.15;
+      const smoothFrequency = THREE.MathUtils.lerp(
+        prevFrequency.current,
+        frequency,
+        lerpFactor
+      );
+      prevFrequency.current = smoothFrequency;
+
+      materialRef.current.uniforms.time.value = state.clock.elapsedTime;
+      materialRef.current.uniforms.frequency.value = smoothFrequency;
+      materialRef.current.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
+      materialRef.current.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
+    } catch (error) {
+      console.error('Error in animation frame:', error);
+    }
   });
 
   useEffect(() => {
@@ -54,8 +69,8 @@ export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
     <shaderMaterial
       ref={materialRef}
       uniforms={uniforms}
-      vertexShader={vertexShader}
-      fragmentShader={fragmentShader}
+      vertexShader={/* ... keep existing code */}
+      fragmentShader={/* ... keep existing code */}
       transparent
       side={THREE.DoubleSide}
     />
