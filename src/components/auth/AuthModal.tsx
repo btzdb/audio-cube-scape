@@ -15,22 +15,37 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
         onClose();
       }
-      // Clear error when auth state changes
-      setError(null);
+      
+      // Handle auth errors through state change
+      if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+        setError(null);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    // Listen for auth errors
+    const handleAuthError = () => {
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (error) {
+          console.error('Auth error:', error);
+          const errorMessage = getErrorMessage(error);
+          setError(errorMessage);
+        }
+      });
+    };
+
+    window.addEventListener('supabase.auth.error', handleAuthError);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('supabase.auth.error', handleAuthError);
+    };
   }, [onClose]);
 
-  // Handle authentication errors
-  const handleError = (error: AuthError) => {
-    console.error('Auth error:', error);
-    
-    // Map error codes to user-friendly messages
+  const getErrorMessage = (error: AuthError): string => {
     const errorMessages: Record<string, string> = {
       'invalid_credentials': 'Invalid email or password. Please check your credentials.',
       'user_not_found': 'No account found with these credentials.',
@@ -38,7 +53,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       'invalid_grant': 'Invalid login credentials.',
     };
 
-    setError(errorMessages[error.message] || error.message);
+    return errorMessages[error.message] || error.message;
   };
 
   return (
@@ -93,7 +108,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   },
                 }}
                 providers={['google', 'github']}
-                onError={handleError}
               />
             </div>
           </motion.div>
