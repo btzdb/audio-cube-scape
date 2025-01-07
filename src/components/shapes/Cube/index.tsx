@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useVisualizerStore } from '../../../store/useVisualizerStore';
 import { CubeShaderMaterial } from './CubeShaderMaterial';
 
 interface CubeProps {
@@ -10,7 +9,6 @@ interface CubeProps {
 
 export function Cube({ frequency }: CubeProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const { settings } = useVisualizerStore();
   const prevFrequency = useRef(frequency);
 
   useFrame(() => {
@@ -24,8 +22,7 @@ export function Cube({ frequency }: CubeProps) {
     );
     prevFrequency.current = smoothFrequency;
 
-    const rotationSpeed = 0.01 * settings.bassBumpSpeed * 
-                         (1 + Math.pow(smoothFrequency / 255, 1.2));
+    const rotationSpeed = 0.01 * (1 + Math.pow(smoothFrequency / 255, 1.2));
     meshRef.current.rotation.x += rotationSpeed;
     meshRef.current.rotation.y += rotationSpeed * 1.5;
   });

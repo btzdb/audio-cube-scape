@@ -1,7 +1,6 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useVisualizerStore } from '../../../store/useVisualizerStore';
 import { createShaderMaterial, updateMaterialUniforms } from './utils/materialUtils';
-import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 interface CubeShaderMaterialProps {
@@ -10,29 +9,19 @@ interface CubeShaderMaterialProps {
 
 export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
   const { settings } = useVisualizerStore();
-  
-  const material = useMemo(() => {
-    return createShaderMaterial(settings);
-  }, [settings]);
+  const material = React.useMemo(() => createShaderMaterial(settings), [settings]);
 
   useEffect(() => {
-    if (material && material.uniforms) {
-      material.uniforms.primaryColor.value = new THREE.Color(settings.customColors.primary);
-      material.uniforms.secondaryColor.value = new THREE.Color(settings.customColors.secondary);
-      material.needsUpdate = true;
-    }
+    if (!material) return;
+    material.uniforms.primaryColor.value.set(settings.customColors.primary);
+    material.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+    material.needsUpdate = true;
   }, [settings.customColors, material]);
 
   useFrame((state) => {
-    if (material && material.uniforms) {
-      updateMaterialUniforms(
-        material,
-        settings,
-        state.clock.getElapsedTime(),
-        frequency
-      );
-    }
+    if (!material) return;
+    updateMaterialUniforms(material, settings, state.clock.elapsedTime, frequency);
   });
 
-  return material ? <primitive object={material} attach="material" /> : null;
+  return <primitive object={material} attach="material" />;
 }
