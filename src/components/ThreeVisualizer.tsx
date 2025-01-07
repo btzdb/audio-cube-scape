@@ -10,11 +10,10 @@ export function ThreeVisualizer() {
   const { analyser } = useAudioContext();
   const [bassFrequency, setBassFrequency] = useState(0);
   const { settings } = useVisualizerStore();
+  const animationFrameRef = useRef<number>();
 
   useEffect(() => {
     if (!analyser) return;
-
-    let animationFrame: number;
 
     const updateBassFrequency = () => {
       try {
@@ -32,18 +31,20 @@ export function ThreeVisualizer() {
         const weightedAvg = weightedSum / bassWeights.length || 0;
         
         setBassFrequency(weightedAvg);
-        animationFrame = requestAnimationFrame(updateBassFrequency);
+        animationFrameRef.current = requestAnimationFrame(updateBassFrequency);
       } catch (error) {
         console.error('Error in frequency analysis:', error);
-        cancelAnimationFrame(animationFrame);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
       }
     };
 
     updateBassFrequency();
 
     return () => {
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [analyser]);

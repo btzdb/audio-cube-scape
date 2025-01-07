@@ -16,7 +16,7 @@ export function Cube({ frequency }: CubeProps) {
     const material = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
-        frequency: { value: frequency },
+        frequency: { value: frequency || 0 },
         primaryColor: { value: new THREE.Color(settings.customColors.primary) },
         secondaryColor: { value: new THREE.Color(settings.customColors.secondary) },
         bassBumpIntensity: { value: settings.bassBumpIntensity || 0.5 },
