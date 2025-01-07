@@ -1,9 +1,13 @@
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useVisualizerStore } from '../../store/useVisualizerStore';
 
-export function Cube({ frequency }: { frequency: number }) {
+interface CubeProps {
+  frequency: number;
+}
+
+export function Cube({ frequency }: CubeProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const { settings } = useVisualizerStore();
   const prevFrequency = useRef(frequency);
@@ -85,14 +89,6 @@ export function Cube({ frequency }: { frequency: number }) {
       side: THREE.DoubleSide
     });
   }, [settings.customColors.primary, settings.customColors.secondary]);
-
-  useEffect(() => {
-    if (shaderMaterial) {
-      shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
-      shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
-      shaderMaterial.needsUpdate = true;
-    }
-  }, [settings.customColors, shaderMaterial]);
 
   useFrame((state) => {
     if (!meshRef.current) return;

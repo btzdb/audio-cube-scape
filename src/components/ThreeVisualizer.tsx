@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useAudioContext } from '../contexts/AudioContext';
 import { useVisualizerStore } from '../store/useVisualizerStore';
 import { Cube } from './shapes/Cube';
 import { Ring } from './shapes/Ring';
+import * as THREE from 'three';
 
 export function ThreeVisualizer() {
   const { analyser } = useAudioContext();
