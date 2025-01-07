@@ -7,12 +7,12 @@ interface CubeProps {
   frequency: number;
 }
 
-export function Cube({ frequency = 0 }: CubeProps) {
+export function Cube({ frequency }: CubeProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { settings } = useVisualizerStore();
-  const prevFrequency = useRef(frequency);
 
-  const shaderMaterial = {
+  const shaderMaterial = new THREE.ShaderMaterial({
     uniforms: {
       time: { value: 0 },
       frequency: { value: 0 },
@@ -86,47 +86,27 @@ export function Cube({ frequency = 0 }: CubeProps) {
     `,
     transparent: true,
     side: THREE.DoubleSide
-  };
+  });
 
   useFrame((state) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || !materialRef.current) return;
 
-    const lerpFactor = 0.15;
-    const smoothFrequency = THREE.MathUtils.lerp(
-      prevFrequency.current,
-      frequency,
-      lerpFactor
-    );
-    prevFrequency.current = smoothFrequency;
+    materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
+    materialRef.current.uniforms.frequency.value = frequency;
+    materialRef.current.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
+    materialRef.current.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
+    materialRef.current.uniforms.primaryColor.value.set(settings.customColors.primary);
+    materialRef.current.uniforms.secondaryColor.value.set(settings.customColors.secondary);
 
-    const rotationSpeed = 0.01 * settings.bassBumpSpeed * 
-                       (1 + Math.pow(smoothFrequency / 255, 1.2));
+    const rotationSpeed = 0.01 * settings.bassBumpSpeed * (1 + Math.pow(frequency / 255, 1.2));
     meshRef.current.rotation.x += rotationSpeed;
     meshRef.current.rotation.y += rotationSpeed * 1.5;
-
-    // Update shader uniforms
-    const material = meshRef.current.material as THREE.ShaderMaterial;
-    if (material && material.uniforms) {
-      material.uniforms.time.value = state.clock.getElapsedTime();
-      material.uniforms.frequency.value = smoothFrequency;
-      material.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
-      material.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
-      material.uniforms.primaryColor.value.set(settings.customColors.primary);
-      material.uniforms.secondaryColor.value.set(settings.customColors.secondary);
-    }
   });
 
   return (
     <mesh ref={meshRef}>
       <boxGeometry args={[1, 1, 1]} />
-      <shaderMaterial 
-        attach="material"
-        transparent
-        side={THREE.DoubleSide}
-        uniforms={shaderMaterial.uniforms}
-        vertexShader={shaderMaterial.vertexShader}
-        fragmentShader={shaderMaterial.fragmentShader}
-      />
+      <primitive object={shaderMaterial} ref={materialRef} attach="material" />
     </mesh>
   );
 }

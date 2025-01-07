@@ -8,23 +8,33 @@ const TrackList = () => {
   const { currentTrack, isPlaying, playTrack, pauseTrack } = useAudioStore();
   const [tracks, setTracks] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const fetchTracks = async () => {
       try {
-        // First, get the list of files from the beats bucket
+        setError(null);
         const { data: storageData, error: storageError } = await supabase
           .storage
           .from('beats')
-          .list();
+          .list('', {
+            limit: 100,
+            offset: 0,
+            sortBy: { column: 'name', order: 'asc' }
+          });
 
-        if (storageError) throw storageError;
+        if (storageError) {
+          console.error('Storage error:', storageError);
+          throw new Error('Failed to load tracks. Please try again later.');
+        }
 
-        // Transform storage data into track format
+        if (!storageData) {
+          throw new Error('No tracks found');
+        }
+
         const formattedTracks = storageData
           .filter(file => file.name.endsWith('.mp3'))
           .map(file => {
-            // Get the public URL using the proper method
             const { data: { publicUrl } } = supabase
               .storage
               .from('beats')
@@ -34,9 +44,9 @@ const TrackList = () => {
               id: file.id,
               title: file.name.replace('.mp3', '').replace(/%20/g, ' '),
               audio_url: publicUrl,
-              duration: '0:00', // We'll update this when audio loads
-              bpm: 128, // Default BPM
-              price: 29.99 // Default price
+              duration: '0:00',
+              bpm: 128,
+              price: 29.99
             };
           });
 
@@ -44,6 +54,7 @@ const TrackList = () => {
         console.log('Loaded tracks:', formattedTracks);
       } catch (error) {
         console.error('Error fetching tracks:', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -56,6 +67,28 @@ const TrackList = () => {
     return (
       <div className="flex justify-center py-8">
         <div className="animate-pulse text-white/60">Loading tracks...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <div className="text-red-500 mb-4">{error}</div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (tracks.length === 0) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="text-white/60">No tracks available</div>
       </div>
     );
   }
