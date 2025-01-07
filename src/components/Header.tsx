@@ -47,9 +47,10 @@ export function Header() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsAuthOpen(true)}
-              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="Sign In"
             >
-              Sign In
+              <Icons.LogIn size={24} className="text-purple-500" />
             </motion.button>
           )}
         </div>

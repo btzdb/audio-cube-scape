@@ -28,6 +28,7 @@ import {
   Star,
   Crown,
   Square,
+  LogIn,
   type LucideIcon
 } from 'lucide-react';
 
@@ -60,7 +61,8 @@ export const Icons = {
   Video,
   Star,
   Crown,
-  Square
+  Square,
+  LogIn
 } as const;
 
 export type Icon = LucideIcon;
