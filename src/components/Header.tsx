@@ -5,6 +5,7 @@ import { AuthModal } from './auth/AuthModal';
 import { Icons } from '@/components/icons';
 import { Avatar } from '@/components/ui/Avatar';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 export function Header() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -33,6 +34,14 @@ export function Header() {
                 imageUrl={profile.avatar_url}
                 username={profile.username}
               />
+              {profile.role === 'admin' && (
+                <Link 
+                  to="/admin"
+                  className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg transition-colors"
+                >
+                  Admin Dashboard
+                </Link>
+              )}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
