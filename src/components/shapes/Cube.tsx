@@ -104,7 +104,6 @@ export function Cube({ frequency = 0 }: CubeProps) {
 
       const rotationSpeed = 0.01 * settings.bassBumpSpeed * 
                          (1 + Math.pow(smoothFrequency / 255, 1.2));
-
       meshRef.current.rotation.x += rotationSpeed;
       meshRef.current.rotation.y += rotationSpeed * 1.5;
 
@@ -122,7 +121,7 @@ export function Cube({ frequency = 0 }: CubeProps) {
   return (
     <mesh ref={meshRef}>
       <boxGeometry args={[1, 1, 1]} />
-      <primitive object={material} attach="material" />
+      <shaderMaterial args={[material]} />
     </mesh>
   );
 }
