@@ -20,15 +20,15 @@ export function ThreeVisualizer() {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
         
-        // Enhanced bass detection with weighted average and safe reduce
+        // Enhanced bass detection with weighted average
         const bassRange = dataArray.slice(0, 10);
         const bassWeights = bassRange.map((value, index) => 
           value * Math.pow(0.9, index)
         );
         
-        // Safe reduce with initial value to prevent undefined acc
-        const weightedSum = bassWeights.reduce((acc, curr) => acc + curr, 0);
-        const weightedAvg = weightedSum / bassWeights.length || 0;
+        // Initialize accumulator with 0 to prevent undefined
+        const weightedSum = bassWeights.reduce((acc, curr) => (acc || 0) + curr, 0);
+        const weightedAvg = weightedSum / bassWeights.length;
         
         setBassFrequency(weightedAvg);
         animationFrameRef.current = requestAnimationFrame(updateBassFrequency);

@@ -13,10 +13,10 @@ export function Cube({ frequency }: CubeProps) {
   const prevFrequency = useRef(frequency);
 
   const shaderMaterial = useMemo(() => {
-    const material = new THREE.ShaderMaterial({
+    return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
-        frequency: { value: frequency || 0 },
+        frequency: { value: 0 },
         primaryColor: { value: new THREE.Color(settings.customColors.primary) },
         secondaryColor: { value: new THREE.Color(settings.customColors.secondary) },
         bassBumpIntensity: { value: settings.bassBumpIntensity || 0.5 },
@@ -88,16 +88,6 @@ export function Cube({ frequency }: CubeProps) {
       transparent: true,
       side: THREE.DoubleSide
     });
-
-    // Initialize all uniforms to prevent undefined values
-    material.uniforms.time.value = 0;
-    material.uniforms.frequency.value = frequency || 0;
-    material.uniforms.primaryColor.value = new THREE.Color(settings.customColors.primary);
-    material.uniforms.secondaryColor.value = new THREE.Color(settings.customColors.secondary);
-    material.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity || 0.5;
-    material.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed || 0.5;
-
-    return material;
   }, [settings.customColors.primary, settings.customColors.secondary, settings.bassBumpIntensity, settings.bassBumpSpeed]);
 
   useFrame((state) => {
@@ -112,12 +102,13 @@ export function Cube({ frequency }: CubeProps) {
       );
       prevFrequency.current = smoothFrequency;
 
-      // Update uniforms safely
       if (shaderMaterial.uniforms) {
         shaderMaterial.uniforms.time.value = state.clock.elapsedTime || 0;
         shaderMaterial.uniforms.frequency.value = smoothFrequency;
         shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
         shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+        shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity || 0.5;
+        shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed || 0.5;
       }
     } catch (error) {
       console.error('Error updating cube:', error);
