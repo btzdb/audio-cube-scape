@@ -1,10 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import { useAudioStore } from '../store/useAudioStore';
-import { useAudioContext } from '@/contexts/AudioContext';
+import { useAudioContext } from '../contexts/AudioContext';
 import { Play, Pause, SkipBack, SkipForward, Volume2, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function AudioPlayer() {
+interface AudioPlayerProps {
+  onInteraction: () => void;
+}
+
+export function AudioPlayer({ onInteraction }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { createAudioSource } = useAudioContext();
   const sourceCreated = useRef(false);
