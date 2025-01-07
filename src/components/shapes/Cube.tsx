@@ -97,27 +97,23 @@ export function Cube({ frequency = 0 }: CubeProps) {
       const lerpFactor = 0.15;
       const smoothFrequency = THREE.MathUtils.lerp(
         prevFrequency.current,
-        frequency || 0,
+        frequency,
         lerpFactor
       );
       prevFrequency.current = smoothFrequency;
 
       const rotationSpeed = 0.01 * (settings.bassBumpSpeed || 0.5) * 
-                         (1 + Math.pow((smoothFrequency || 0) / 255, 1.2));
+                         (1 + Math.pow(smoothFrequency / 255, 1.2));
                          
-      if (meshRef.current) {
-        meshRef.current.rotation.x += rotationSpeed;
-        meshRef.current.rotation.y += rotationSpeed * 1.5;
-      }
+      meshRef.current.rotation.x += rotationSpeed;
+      meshRef.current.rotation.y += rotationSpeed * 1.5;
 
-      if (shaderMaterial.uniforms) {
-        shaderMaterial.uniforms.time.value = state.clock.elapsedTime || 0;
-        shaderMaterial.uniforms.frequency.value = smoothFrequency || 0;
-        shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity || 0.5;
-        shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed || 0.5;
-        shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary || '#ff0000');
-        shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary || '#00ff00');
-      }
+      shaderMaterial.uniforms.time.value = state.clock.elapsedTime;
+      shaderMaterial.uniforms.frequency.value = smoothFrequency;
+      shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity || 0.5;
+      shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed || 0.5;
+      shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary || '#ff0000');
+      shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary || '#00ff00');
     } catch (error) {
       console.error('Error updating cube:', error);
     }
