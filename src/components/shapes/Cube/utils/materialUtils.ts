@@ -25,10 +25,10 @@ export const updateMaterialUniforms = (
   time: number,
   frequency: number
 ) => {
-  material.uniforms.time.value = time;
-  material.uniforms.frequency.value = frequency;
-  material.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
-  material.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
-  material.uniforms.primaryColor.value.set(settings.customColors.primary);
-  material.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+  if (material.uniforms) {
+    material.uniforms.time.value = time;
+    material.uniforms.frequency.value = frequency;
+    material.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
+    material.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
+  }
 };
