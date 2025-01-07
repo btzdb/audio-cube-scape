@@ -58,14 +58,6 @@ export function CubeShaderMaterial({ frequency }: CubeShaderProps) {
     }
   });
 
-  useEffect(() => {
-    return () => {
-      if (materialRef.current) {
-        materialRef.current.dispose();
-      }
-    };
-  }, []);
-
   return (
     <shaderMaterial
       ref={materialRef}

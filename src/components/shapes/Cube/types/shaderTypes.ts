@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export interface CubeUniforms {
+export interface CubeUniforms extends Record<string, THREE.IUniform<any>> {
   time: THREE.IUniform<number>;
   frequency: THREE.IUniform<number>;
   primaryColor: THREE.IUniform<THREE.Color>;
