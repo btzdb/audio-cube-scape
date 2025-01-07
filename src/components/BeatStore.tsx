@@ -3,13 +3,13 @@ import TrackList from './TrackList';
 import { AudioPlayer } from './AudioPlayer';
 import { Background } from './Background';
 import { useAudioStore } from '../store/useAudioStore';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ThreeVisualizer } from './ThreeVisualizer';
 
 const BeatStore = () => {
-  const { currentTrack } = useAudioStore();
+  const { currentTrack, isPlaying } = useAudioStore();
 
   const handleInteraction = () => {
-    // Handle any interaction events here if needed
     console.log('Audio player interaction occurred');
   };
 
@@ -27,13 +27,27 @@ const BeatStore = () => {
           <p className="text-muted">Discover and preview unique beats</p>
         </motion.header>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-panel p-6"
-        >
-          <TrackList />
-        </motion.div>
+        <AnimatePresence mode="wait">
+          {!isPlaying ? (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="glass-panel p-6"
+            >
+              <TrackList />
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="w-full h-[60vh] relative"
+            >
+              <ThreeVisualizer />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {currentTrack && (
           <motion.div 
