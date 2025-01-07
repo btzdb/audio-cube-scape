@@ -13,7 +13,7 @@ export function Cube({ frequency = 0 }: CubeProps) {
   const prevFrequency = useRef(0);
 
   const shaderMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         frequency: { value: 0 },
@@ -88,6 +88,7 @@ export function Cube({ frequency = 0 }: CubeProps) {
       transparent: true,
       side: THREE.DoubleSide
     });
+    return material;
   }, [settings.customColors.primary, settings.customColors.secondary, settings.bassBumpIntensity, settings.bassBumpSpeed]);
 
   useFrame((state) => {
@@ -102,18 +103,18 @@ export function Cube({ frequency = 0 }: CubeProps) {
       );
       prevFrequency.current = smoothFrequency;
 
-      const rotationSpeed = 0.01 * (settings.bassBumpSpeed || 0.5) * 
+      const rotationSpeed = 0.01 * settings.bassBumpSpeed * 
                          (1 + Math.pow(smoothFrequency / 255, 1.2));
-                         
+
       meshRef.current.rotation.x += rotationSpeed;
       meshRef.current.rotation.y += rotationSpeed * 1.5;
 
-      shaderMaterial.uniforms.time.value = state.clock.elapsedTime;
+      shaderMaterial.uniforms.time.value = state.clock.getElapsedTime();
       shaderMaterial.uniforms.frequency.value = smoothFrequency;
-      shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity || 0.5;
-      shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed || 0.5;
-      shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary || '#ff0000');
-      shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary || '#00ff00');
+      shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
+      shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
+      shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
+      shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
     } catch (error) {
       console.error('Error updating cube:', error);
     }
