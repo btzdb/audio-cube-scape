@@ -12,14 +12,28 @@ const TrackList = () => {
   React.useEffect(() => {
     const fetchTracks = async () => {
       try {
-        const { data, error } = await supabase
+        // First, get the list of files from the beats bucket
+        const { data: storageData, error: storageError } = await supabase
+          .storage
           .from('beats')
-          .select('*')
-          .eq('status', 'active')
-          .order('created_at', { ascending: false });
+          .list();
 
-        if (error) throw error;
-        setTracks(data || []);
+        if (storageError) throw storageError;
+
+        // Transform storage data into track format
+        const formattedTracks = storageData
+          .filter(file => file.name.endsWith('.mp3'))
+          .map(file => ({
+            id: file.id,
+            title: file.name.replace('.mp3', '').replace(/%20/g, ' '),
+            audio_url: `${supabase.supabaseUrl}/storage/v1/object/public/beats/${file.name}`,
+            duration: '0:00', // We'll update this when audio loads
+            bpm: 128, // Default BPM
+            price: 29.99 // Default price
+          }));
+
+        setTracks(formattedTracks);
+        console.log('Loaded tracks:', formattedTracks);
       } catch (error) {
         console.error('Error fetching tracks:', error);
       } finally {
@@ -73,7 +87,7 @@ const TrackList = () => {
                 </motion.button>
               </td>
               <td className="py-4 px-4">{track.title}</td>
-              <td className="py-4 px-4">{track.duration}s</td>
+              <td className="py-4 px-4">{track.duration}</td>
               <td className="py-4 px-4">{track.bpm} BPM</td>
               <td className="py-4 px-4">${track.price}</td>
             </motion.tr>
