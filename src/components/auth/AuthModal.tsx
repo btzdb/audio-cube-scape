@@ -20,8 +20,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose();
       }
       
-      // Handle auth errors through state change
-      if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+      // Clear errors on sign out
+      if (event === 'SIGNED_OUT') {
         setError(null);
       }
     });
