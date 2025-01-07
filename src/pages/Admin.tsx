@@ -10,19 +10,46 @@ import { supabase } from '@/integrations/supabase/client';
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { profile, isLoading } = useProfile();
+  const { profile, isLoading, error } = useProfile();
 
   useEffect(() => {
-    // Check if user is authenticated and has admin role
-    if (!isLoading && (!profile || profile.role !== 'admin')) {
-      toast({
-        title: "Access Denied",
-        description: "You need admin privileges to access this page.",
-        variant: "destructive"
-      });
-      navigate('/');
+    // Add detailed console logs for debugging
+    console.log('Admin page - Profile:', profile);
+    console.log('Admin page - Loading:', isLoading);
+    console.log('Admin page - Error:', error);
+
+    if (!isLoading) {
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load profile: " + error.message,
+          variant: "destructive"
+        });
+        navigate('/');
+        return;
+      }
+
+      if (!profile) {
+        toast({
+          title: "Access Denied",
+          description: "Please sign in to access this page",
+          variant: "destructive"
+        });
+        navigate('/');
+        return;
+      }
+
+      if (profile.role !== 'admin') {
+        toast({
+          title: "Access Denied",
+          description: "You need admin privileges to access this page",
+          variant: "destructive"
+        });
+        navigate('/');
+        return;
+      }
     }
-  }, [profile, isLoading, navigate, toast]);
+  }, [profile, isLoading, error, navigate, toast]);
 
   // Show loading state while checking permissions
   if (isLoading) {
