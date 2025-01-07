@@ -1,21 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Upload, Plus, ArrowLeft } from 'lucide-react';
+import { Upload, Plus, ArrowLeft, Trash, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/hooks/useProfile';
+
+interface Beat {
+  id: string;
+  title: string;
+  bpm: number | null;
+  price: number;
+  audio_url: string;
+  created_at: string;
+}
 
 const Admin = () => {
   const { toast } = useToast();
+  const { profile } = useProfile();
   const [uploading, setUploading] = useState(false);
-  const [tracks, setTracks] = useState([
-    { id: 1, title: 'Summer Vibes', bpm: 128, price: 29.99, sales: 12 },
-    { id: 2, title: 'Midnight Dreams', bpm: 140, price: 34.99, sales: 8 },
-    { id: 3, title: 'Urban Flow', bpm: 95, price: 24.99, sales: 15 },
-  ]);
+  const [beats, setBeats] = useState<Beat[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBeats();
+  }, []);
+
+  const fetchBeats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('beats')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBeats(data || []);
+    } catch (error) {
+      console.error('Error fetching beats:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch beats',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -31,13 +64,11 @@ const Admin = () => {
       const filePath = `${timestamp}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
       // Upload to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('beats')
         .upload(filePath, file);
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
@@ -51,18 +82,20 @@ const Admin = () => {
           title: file.name.split('.')[0],
           audio_url: publicUrl,
           price: 29.99, // Default price
+          artist_id: profile?.id,
         });
 
-      if (dbError) {
-        throw dbError;
-      }
+      if (dbError) throw dbError;
 
       toast({
-        title: 'Upload successful',
-        description: 'Your beat has been uploaded successfully.',
+        title: 'Success',
+        description: 'Beat uploaded successfully',
       });
 
-    } catch (error) {
+      // Refresh beats list
+      fetchBeats();
+
+    } catch (error: any) {
       console.error('Upload error:', error);
       toast({
         title: 'Upload failed',
@@ -73,6 +106,42 @@ const Admin = () => {
       setUploading(false);
     }
   };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('beats')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Beat deleted successfully',
+      });
+
+      setBeats(beats.filter(beat => beat.id !== id));
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      toast({
+        title: 'Delete failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white p-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
+          <p>You need to be logged in to access the admin panel.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
@@ -99,10 +168,6 @@ const Admin = () => {
                 className="hidden"
               />
             </label>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Beat
-            </Button>
           </div>
         </div>
 
@@ -120,7 +185,7 @@ const Admin = () => {
               <CardTitle>Total Beats</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{tracks.length}</p>
+              <p className="text-3xl font-bold">{beats.length}</p>
             </CardContent>
           </Card>
           <Card className="bg-gray-800 border-gray-700">
@@ -150,21 +215,29 @@ const Admin = () => {
                   <TableHead>Title</TableHead>
                   <TableHead>BPM</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Sales</TableHead>
+                  <TableHead>Uploaded</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tracks.map((track) => (
-                  <TableRow key={track.id}>
-                    <TableCell>{track.title}</TableCell>
-                    <TableCell>{track.bpm}</TableCell>
-                    <TableCell>${track.price}</TableCell>
-                    <TableCell>{track.sales}</TableCell>
+                {beats.map((beat) => (
+                  <TableRow key={beat.id}>
+                    <TableCell>{beat.title}</TableCell>
+                    <TableCell>{beat.bpm || 'N/A'}</TableCell>
+                    <TableCell>${beat.price}</TableCell>
+                    <TableCell>{new Date(beat.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">Edit</Button>
-                        <Button variant="destructive" size="sm">Delete</Button>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => handleDelete(beat.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
