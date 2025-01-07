@@ -40,4 +40,5 @@
 
 .visualizer-container {
   @apply fixed inset-0 -z-10;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%);
 }
