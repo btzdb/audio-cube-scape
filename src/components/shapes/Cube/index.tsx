@@ -13,7 +13,7 @@ export function Cube({ frequency }: CubeProps) {
   const prevFrequency = useRef(frequency);
   const { settings } = useVisualizerStore();
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!meshRef.current) return;
 
     const lerpFactor = 0.15;

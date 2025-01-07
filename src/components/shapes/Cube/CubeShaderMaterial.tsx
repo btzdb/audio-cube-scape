@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useVisualizerStore } from '../../../store/useVisualizerStore';
@@ -12,14 +12,15 @@ export function CubeShaderMaterial({ frequency }: CubeShaderMaterialProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { settings } = useVisualizerStore();
 
-  const uniforms = {
+  // Initialize uniforms outside of render cycle
+  const uniforms = React.useMemo(() => ({
     time: { value: 0 },
     frequency: { value: frequency },
     primaryColor: { value: new THREE.Color(settings.customColors.primary) },
     secondaryColor: { value: new THREE.Color(settings.customColors.secondary) },
     bassBumpIntensity: { value: settings.bassBumpIntensity },
     bassBumpSpeed: { value: settings.bassBumpSpeed }
-  };
+  }), []); // Empty deps since we'll update values in useFrame
 
   useFrame((state) => {
     if (!materialRef.current) return;
