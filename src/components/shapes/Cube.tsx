@@ -4,23 +4,23 @@ import * as THREE from 'three';
 import { useVisualizerStore } from '../../store/useVisualizerStore';
 
 interface CubeProps {
-  frequency: number;
+  frequency?: number;
 }
 
 export function Cube({ frequency = 0 }: CubeProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const { settings } = useVisualizerStore();
-  const prevFrequency = useRef(0);
+  const prevFrequency = useRef(frequency);
 
-  const shaderMaterial = useMemo(() => {
-    const material = new THREE.ShaderMaterial({
+  const material = useMemo(() => {
+    return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         frequency: { value: 0 },
-        primaryColor: { value: new THREE.Color(settings.customColors.primary || '#ff0000') },
-        secondaryColor: { value: new THREE.Color(settings.customColors.secondary || '#00ff00') },
-        bassBumpIntensity: { value: settings.bassBumpIntensity || 0.5 },
-        bassBumpSpeed: { value: settings.bassBumpSpeed || 0.5 }
+        primaryColor: { value: new THREE.Color(settings.customColors.primary) },
+        secondaryColor: { value: new THREE.Color(settings.customColors.secondary) },
+        bassBumpIntensity: { value: settings.bassBumpIntensity },
+        bassBumpSpeed: { value: settings.bassBumpSpeed }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -88,7 +88,6 @@ export function Cube({ frequency = 0 }: CubeProps) {
       transparent: true,
       side: THREE.DoubleSide
     });
-    return material;
   }, [settings.customColors.primary, settings.customColors.secondary, settings.bassBumpIntensity, settings.bassBumpSpeed]);
 
   useFrame((state) => {
@@ -109,12 +108,12 @@ export function Cube({ frequency = 0 }: CubeProps) {
       meshRef.current.rotation.x += rotationSpeed;
       meshRef.current.rotation.y += rotationSpeed * 1.5;
 
-      shaderMaterial.uniforms.time.value = state.clock.getElapsedTime();
-      shaderMaterial.uniforms.frequency.value = smoothFrequency;
-      shaderMaterial.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
-      shaderMaterial.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
-      shaderMaterial.uniforms.primaryColor.value.set(settings.customColors.primary);
-      shaderMaterial.uniforms.secondaryColor.value.set(settings.customColors.secondary);
+      material.uniforms.time.value = state.clock.getElapsedTime();
+      material.uniforms.frequency.value = smoothFrequency;
+      material.uniforms.bassBumpIntensity.value = settings.bassBumpIntensity;
+      material.uniforms.bassBumpSpeed.value = settings.bassBumpSpeed;
+      material.uniforms.primaryColor.value.set(settings.customColors.primary);
+      material.uniforms.secondaryColor.value.set(settings.customColors.secondary);
     } catch (error) {
       console.error('Error updating cube:', error);
     }
@@ -123,7 +122,7 @@ export function Cube({ frequency = 0 }: CubeProps) {
   return (
     <mesh ref={meshRef}>
       <boxGeometry args={[1, 1, 1]} />
-      <primitive object={shaderMaterial} attach="material" />
+      <primitive object={material} attach="material" />
     </mesh>
   );
 }
