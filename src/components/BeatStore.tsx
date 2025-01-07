@@ -8,6 +8,11 @@ import { motion } from 'framer-motion';
 const BeatStore = () => {
   const { currentTrack } = useAudioStore();
 
+  const handleInteraction = () => {
+    // Handle any interaction events here if needed
+    console.log('Audio player interaction occurred');
+  };
+
   return (
     <div className="min-h-screen w-full relative">
       <Background />
@@ -36,7 +41,7 @@ const BeatStore = () => {
             animate={{ y: 0 }}
             className="fixed bottom-0 left-0 right-0 glass-panel"
           >
-            <AudioPlayer />
+            <AudioPlayer onInteraction={handleInteraction} />
           </motion.div>
         )}
       </div>
